@@ -19,6 +19,12 @@ pipeline {
             }
         }
 
+        stage('Configure Assigned LoadBalancer IP') {
+            steps {
+                sh 'kubectl apply -f metallb-production.yaml'
+            }
+        }
+
         stage('Lint HTML') {
             steps {
                 sh 'npm install htmlhint --save-dev'
@@ -65,8 +71,8 @@ pipeline {
                     sh "sed -i 's|${DOCKER_IMAGE}:latest|${DOCKER_IMAGE}:${IMAGE_TAG}|' deployment-prod.yaml"
                     sh "kubectl apply -f deployment-prod.yaml"
                     sh "kubectl rollout status deployment/minterjt-lab35-prod --timeout=180s"
-                    sh "kubectl wait --for=jsonpath='{.status.loadBalancer.ingress[0].ip}'=10.48.229.166 service/minterjt-lab35-prod-service --timeout=120s"
-                    sh 'curl --fail --retry 10 --retry-delay 3 --retry-connrefused http://10.48.229.166:8081/ | grep "Lab3-5 Works"'
+                    sh "kubectl wait --for=jsonpath='{.status.loadBalancer.ingress[0].ip}'=10.48.229.34 service/minterjt-lab35-prod-service --timeout=120s"
+                    sh 'curl --fail --retry 10 --retry-delay 3 --retry-connrefused http://10.48.229.34:8081/ | grep "Lab3-5 Works"'
                 }
             }
         }
